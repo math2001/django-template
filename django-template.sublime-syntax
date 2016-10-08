@@ -1,0 +1,77 @@
+%YAML 1.2
+---
+name: Django Template
+file_extensions:
+  - djt
+scope: embedding.djt
+contexts:
+  main:
+    - match: ''
+      push: 'scope:text.html.basic'
+      with_prototype:
+        - match: '\{%'
+          captures:
+            0: punctuation.section.embedded.action.begin.djt
+          push:
+            - meta_scope: meta.embedded.block.action.djt
+            - match: '%\}'
+              captures:
+                0: punctuation.section.embedded.action.end.djt
+              pop: true
+            - include: django
+
+        - match: '\{\{'
+          captures:
+            0: punctuation.section.embedded.render.begin.djt
+          push:
+            - meta_scope: meta.embedded.block.render.djt
+            - match: '\}\}'
+              captures:
+                0: punctuation.section.embedded.render.end.djt
+              pop: true
+            - include: django
+
+  django:
+    - match: \b(end)?(autoescape|block|comment|csrf_token|cycle|debug|filter|as|firstof|if|elif|for|empty|not|or|and|in|ifequal|ifnotequal|ifchanged|include|with|load|now|regroup|resetcycle|spaceless|templatetag|url|verbatim|widthratio|blocktrans|extends)\b
+      scope: keyword.djt
+    - match: '[a-zA-Z_][a-zA-Z_0-9]+(\|)(add|addslashes|capfirst|center|cut|date|default|default_if_none|dictsort|divisibleby|escape|escapejs|filesizeformat|first|force_escape|get_digit|iriencode|join|last|length|length_is|linebreaks|linebreaksbr|linenumbers|lower|make_list|phone2numeric|pluralize|pprint|random|rjust|safe|safeseq|slice|slugify|stringformat|striptags|time|timesince|timeuntil|title|truncatechars|truncatechars_html|truncatewords|truncatewords_html|unordered_list|upper|urlencode|urlize|urlizetrunc|wordcount|wordwrap|yesno)'
+      captures:
+        1: keyword.operator.djt
+        2: support.function
+
+    - include: string
+
+  
+  
+  
+  string-double-quoted:
+    - match: '"'
+      comment: This contentName is just to allow the usage of “select scope” to select the string contents first, then the string with quotes
+      captures:
+        0: punctuation.definition.string.begin.php
+      push:
+        - meta_scope: string.quoted.double.php
+        - meta_content_scope: meta.string-contents.quoted.double.php
+        - match: '"'
+          captures:
+            0: punctuation.definition.string.end.php
+          pop: true
+
+  string-single-quoted:
+    - match: "'"
+      captures:
+        0: punctuation.definition.string.begin.php
+      push:
+        - meta_scope: string.quoted.single.php
+        - meta_content_scope: meta.string-contents.quoted.single.php
+        - match: "'"
+          captures:
+            0: punctuation.definition.string.end.php
+          pop: true
+        - match: '\\[\\'']'
+          scope: constant.character.escape.php
+
+
+  string:
+    - include: string-single-quoted
+    - include: string-double-quoted
